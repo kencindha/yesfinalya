@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Interactive AR with 3D Model</title>
+    <!-- A-Frame library -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- AR.js library -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
+    <!-- Gesture Detector Component -->
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-gesture-detector/v3.0.0/dist/aframe-gesture-detector.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs>
+      <!-- Marker -->
+      <a-marker preset="custom" type="pattern" url="marker/qrcode.patt">
+        <!-- 3D Model with Gesture Interaction -->
+        <a-entity gltf-model="url(models/ruangtamu.glb)" 
+                  scale="1 1 1" 
+                  position="0 0 0"
+                  gesture-handler
+                  draggable
+                  resizable
+                  rotatable>
+        </a-entity>
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Custom Script to Handle Gesture Interaction -->
+    <script>
+      AFRAME.registerComponent('gesture-handler', {
+        schema: {
+          enabled: {default: true},
+          rotationFactor: {default: 5},
+          scaleFactor: {default: 0.01}
+        },
+        init: function () {
+          this.handleRotation = this.handleRotation.bind(this);
+          this.handleScale = this.handleScale.bind(this);
+          this.el.sceneEl.addEventListener('rotation', this.handleRotation);
+          this.el.sceneEl.addEventListener('scale', this.handleScale);
+        },
+        handleRotation: function (event) {
+          this.el.object3D.rotation.y += event.detail.rotation * this.data.rotationFactor;
+        },
+        handleScale: function (event) {
+          this.el.object3D.scale.multiplyScalar(1 + event.detail.spreadChange * this.data.scaleFactor);
+        }
+      });
+
+      AFRAME.registerComponent('draggable', {
+        schema: {
+          enabled: {default: true}
+        },
+        init: function () {
+          this.handleDrag = this.handleDrag.bind(this);
+          this.el.addEventListener('drag', this.handleDrag);
+        },
+        handleDrag: function (event) {
+          this.el.object3D.position.x += event.detail.x;
+          this.el.object3D.position.y += event.detail.y;
+          this.el.object3D.position.z += event.detail.z;
+        }
+      });
+
+      AFRAME.registerComponent('resizable', {
+        schema: {
+          enabled: {default: true}
+        },
+        init: function () {
+          this.handleResize = this.handleResize.bind(this);
+          this.el.addEventListener('resize', this.handleResize);
+        },
+        handleResize: function (event) {
+          this.el.object3D.scale.multiplyScalar(1 + event.detail.spreadChange * 0.01);
+        }
+      });
+
+      AFRAME.registerComponent('rotatable', {
+        schema: {
+          enabled: {default: true}
+        },
+        init: function () {
+          this.handleRotate = this.handleRotate.bind(this);
+          this.el.addEventListener('rotate', this.handleRotate);
+        },
+        handleRotate: function (event) {
+          this.el.object3D.rotation.x += event.detail.rotation.x;
+          this.el.object3D.rotation.y += event.detail.rotation.y;
+          this.el.object3D.rotation.z += event.detail.rotation.z;
+        }
+      });
+    </script>
+
+    <!-- Add event listener for marker found -->
+<script>
+  document.querySelector('a-marker').addEventListener('markerFound', function() {
+    console.log('Marker found!');
+    // Set 3D model to center of marker
+    document.querySelector('a-entity[gltf-model]').setAttribute('position', '0 0 0');
+    // Set skala 3D model
+    document.querySelector('a-entity[gltf-model]').setAttribute('scale', '1 1 1');
+  });
+</script>
+
+<!-- Add event listener for gesture detector -->
+<script>
+  document.querySelector('a-entity[gltf-model]').addEventListener('gesture', function(event) {
+    console.log('Gesture detected!');
+    // Handle gesture event
+  });
+</script>
+  </body>
+</html>
